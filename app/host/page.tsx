@@ -111,10 +111,16 @@ function Host() {
     setBusy(false);
   };
 
-  const judge = async (points: 1 | -1) => {
+  const right = async () => {
     if (!round) return;
-    const { error } = await sb().rpc('buzzer_judge', { p_round_id: round.id, p_points: points });
+    const { error } = await sb().rpc('buzzer_judge', { p_round_id: round.id, p_points: 1 });
     setError(error ? `Point fejlede: ${error.message}` : null);
+  };
+
+  const wrong = async () => {
+    if (!round) return;
+    const { error } = await sb().rpc('buzzer_wrong', { p_round_id: round.id });
+    setError(error ? `Genåbning fejlede: ${error.message}` : null);
   };
 
   const reset = async () => {
@@ -141,7 +147,7 @@ function Host() {
   const resolved = !!(round?.resolved_at && round.winner_team);
   let teamCls = '';
   let state = 'Klar';
-  let sub = 'Venter på første tryk';
+  let sub = round?.excluded?.length ? 'Åbent igen – de andre kan gætte' : 'Venter på første tryk';
   if (!round) {
     state = '…';
     sub = 'Forbinder';
@@ -164,16 +170,15 @@ function Host() {
           <div className="judge">
             <button
               className={`judgebtn right ${round!.points === 1 ? 'chosen' : ''}`}
-              onClick={() => judge(1)}
+              onClick={right}
             >
               Rigtigt +1
             </button>
-            <button
-              className={`judgebtn wrong ${round!.points === -1 ? 'chosen' : ''}`}
-              onClick={() => judge(-1)}
-            >
-              Forkert −1
-            </button>
+            {round!.points !== 1 && (
+              <button className="judgebtn wrong" onClick={wrong}>
+                Forkert −1
+              </button>
+            )}
           </div>
         )}
       </section>

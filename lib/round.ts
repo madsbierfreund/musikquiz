@@ -13,6 +13,7 @@ export type Round = {
   winner_name: string | null;
   winner_player_id: string | null;
   points: number | null;
+  excluded: string[] | null;
   winner_press_ms: number | null;
 };
 

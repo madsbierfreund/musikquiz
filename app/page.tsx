@@ -77,6 +77,7 @@ function Buzzer({ player, onLeave }: { player: Player; onLeave: () => void }) {
   useEffect(() => startClockSync(), []);
 
   const resolved = !!round?.resolved_at;
+  const excluded = !!round?.excluded?.includes(player.player_id);
   const won =
     resolved &&
     pressedRound === round!.id &&
@@ -94,7 +95,7 @@ function Buzzer({ player, onLeave }: { player: Player; onLeave: () => void }) {
 
   const press = (e: React.PointerEvent) => {
     e.preventDefault();
-    if (!round || round.resolved_at || pressedRound === round.id) return;
+    if (!round || round.resolved_at || excluded || pressedRound === round.id) return;
     const pressMs = serverTimeFromEvent(e.nativeEvent.timeStamp);
     const roundId = round.id;
     setPressedRound(roundId);
@@ -113,7 +114,7 @@ function Buzzer({ player, onLeave }: { player: Player; onLeave: () => void }) {
 
   let cls = '';
   let big = 'TRYK';
-  let small = 'Tryk når du kender svaret';
+  let small = round?.excluded?.length ? 'Spørgsmålet er åbent igen' : 'Tryk når du kender svaret';
   if (!round) {
     big = '…';
     small = 'Forbinder';
@@ -129,6 +130,10 @@ function Buzzer({ player, onLeave }: { player: Player; onLeave: () => void }) {
         ? `${round.winner_name} fra Hold ${TEAM_NAME[round.winner_team]} var først`
         : 'Venter på næste runde';
     }
+  } else if (excluded) {
+    cls = 'lost';
+    big = 'Vent';
+    small = 'Du har svaret forkert på dette spørgsmål';
   } else if (pressedRound === round.id) {
     cls = 'pressed';
     big = '…';
