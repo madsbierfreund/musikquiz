@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { sb } from '@/lib/supabase';
-import { resolveSoon, Round, Team, TEAM_NAME, useCurrentRound, useWakeLock } from '@/lib/round';
+import { Round, Team, TEAM_NAME, useCurrentRound, useWakeLock } from '@/lib/round';
 import { audio, playTeam } from '@/lib/sounds';
 
 export default function HostPage() {
@@ -63,21 +63,38 @@ function useScores(round: Round | null): Scores {
 }
 
 function Host() {
-  const round = useCurrentRound();
+  const liveRound = useCurrentRound();
+  const [fetched, setFetched] = useState<Round | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const round = fetched && liveRound && fetched.id === liveRound.id && !liveRound.resolved_at ? fetched : liveRound;
   const scores = useScores(round);
-  const resolvedFor = useRef<number | null>(null);
   const playedFor = useRef<number | null>(null);
   const [busy, setBusy] = useState(false);
   const [confirmReset, setConfirmReset] = useState(false);
   useWakeLock();
 
-  // Backup: resolve the round if no player's call got through.
+  // Keep trying to resolve until the round is decided, and surface any database error.
+  const pendingId = round && round.first_arrival_at && !round.resolved_at ? round.id : null;
   useEffect(() => {
-    if (round && round.first_arrival_at && !round.resolved_at && resolvedFor.current !== round.id) {
-      resolvedFor.current = round.id;
-      resolveSoon(round.id);
-    }
-  }, [round]);
+    if (pendingId == null) return;
+    let alive = true;
+    const tryResolve = async () => {
+      const { error } = await sb().rpc('buzzer_resolve', { p_round_id: pendingId });
+      if (!alive) return;
+      setError(error ? `Afgørelse fejlede: ${error.message}` : null);
+      if (!error) {
+        const { data } = await sb().from('buzzer_rounds').select('*').eq('id', pendingId).maybeSingle();
+        if (alive && data?.resolved_at) setFetched(data as Round);
+      }
+    };
+    const first = setTimeout(tryResolve, 350);
+    const id = setInterval(tryResolve, 600);
+    return () => {
+      alive = false;
+      clearTimeout(first);
+      clearInterval(id);
+    };
+  }, [pendingId]);
 
   useEffect(() => {
     if (round?.resolved_at && round.winner_team && playedFor.current !== round.id) {
@@ -96,7 +113,8 @@ function Host() {
 
   const judge = async (points: 1 | -1) => {
     if (!round) return;
-    await sb().rpc('buzzer_judge', { p_round_id: round.id, p_points: points });
+    const { error } = await sb().rpc('buzzer_judge', { p_round_id: round.id, p_points: points });
+    setError(error ? `Point fejlede: ${error.message}` : null);
   };
 
   const reset = async () => {
@@ -141,6 +159,7 @@ function Host() {
       <section className="stagearea">
         <h1 className="display state">{state}</h1>
         <p className="sub">{sub}</p>
+        {error && <p className="error">{error}</p>}
         {resolved && (
           <div className="judge">
             <button

@@ -133,3 +133,4 @@ button:focus-visible, input:focus-visible { outline: 4px solid var(--ink); outli
   .hostgrid { grid-template-columns: 1fr; grid-template-rows: auto auto auto; overflow: auto; }
   body:has(.hostgrid) { overflow: auto; }
 }
+.error { background: #fff; color: #9b1c1c; border: 2px solid #9b1c1c; border-radius: 10px; padding: 8px 14px; font-size: 18px; max-width: 90%; -webkit-user-select: text; user-select: text; }
