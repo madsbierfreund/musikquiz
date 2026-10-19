@@ -1,0 +1,91 @@
+:root {
+  --ground: #f3efe4;
+  --ink: #1d2433;
+  --blue: #1f5fae;
+  --blue-deep: #123c72;
+  --red: #b8322a;
+  --red-deep: #7c1d17;
+  --lozenge: rgba(31, 95, 174, .07);
+  --display: "Grenze Gotisch", Georgia, serif;
+  --body: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+  background-color: var(--ground);
+  background-image:
+    linear-gradient(45deg, var(--lozenge) 25%, transparent 25%, transparent 75%, var(--lozenge) 75%),
+    linear-gradient(45deg, var(--lozenge) 25%, transparent 25%, transparent 75%, var(--lozenge) 75%);
+  background-size: 44px 44px;
+  background-position: 0 0, 22px 22px;
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 18px;
+  overflow: hidden;
+  -webkit-user-select: none; user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+button { font: inherit; cursor: pointer; touch-action: manipulation; }
+.screen {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right))
+           max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+}
+.display { font-family: var(--display); font-weight: 800; line-height: 1; }
+
+/* Join */
+.join { justify-content: center; align-items: center; text-align: center; }
+.join h1 { font-size: clamp(48px, 14vw, 96px); margin: 0; }
+.join input {
+  font: inherit; font-size: 24px; padding: 14px 16px; width: min(100%, 420px);
+  border: 3px solid var(--ink); border-radius: 14px; background: #fff; color: var(--ink);
+  -webkit-user-select: text; user-select: text;
+}
+.join .teams { display: flex; gap: 12px; width: min(100%, 420px); }
+.teambtn {
+  flex: 1; border: 0; border-radius: 18px; color: #fff; padding: 22px 8px;
+  font-family: var(--display); font-weight: 800; font-size: 34px;
+  box-shadow: inset 0 -6px 0 rgba(0,0,0,.22);
+}
+.teambtn:disabled { opacity: .4; cursor: default; }
+.blaa { background: radial-gradient(circle at 50% 35%, #3b7fd0, var(--blue) 55%, var(--blue-deep)); }
+.roed { background: radial-gradient(circle at 50% 35%, #d9544a, var(--red) 55%, var(--red-deep)); }
+.muted { opacity: .7; font-size: 16px; }
+
+/* Player */
+.topbar { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.topbar strong { font-size: 22px; }
+.link { background: none; border: 0; color: var(--ink); text-decoration: underline; padding: 4px; font-size: 16px; }
+.buzz {
+  flex: 1; min-height: 0; border: 0; border-radius: 32px; color: #fff;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+  box-shadow: inset 0 -12px 0 rgba(0,0,0,.22);
+  transition: transform .06s, filter .2s, opacity .2s;
+  padding: 16px; text-align: center;
+}
+.buzz .big { font-family: var(--display); font-weight: 800; font-size: clamp(64px, 22vw, 180px); line-height: 1; text-shadow: 0 4px 0 rgba(0,0,0,.25); }
+.buzz .small { font-size: clamp(20px, 5vw, 32px); letter-spacing: .06em; }
+.buzz.pressed { transform: scale(.97); filter: brightness(.85); }
+.buzz.lost { filter: grayscale(.9) brightness(.7); opacity: .55; }
+.buzz.won { animation: pulse .5s ease-in-out 4; }
+@keyframes pulse { 0%,100% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(1.02); filter: brightness(1.35); } }
+
+/* Host */
+.host { align-items: center; justify-content: center; text-align: center; transition: background .2s; }
+.host.blaa, .host.roed { color: #fff; }
+.host .state { font-size: clamp(64px, 14vw, 220px); margin: 0; }
+.host .sub { font-size: clamp(24px, 4vw, 56px); letter-spacing: .06em; }
+.host .actions { position: fixed; bottom: max(20px, env(safe-area-inset-bottom)); left: 0; right: 0; display: flex; justify-content: center; }
+.pill {
+  border: 3px solid var(--ink); background: var(--ground); color: var(--ink);
+  font-weight: 700; font-size: 24px; letter-spacing: .1em; text-transform: uppercase;
+  padding: 14px 30px; border-radius: 999px; box-shadow: 0 4px 0 var(--ink);
+}
+.pill:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); }
+button:focus-visible, input:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { .buzz.won { animation: none; filter: brightness(1.2); } }
