@@ -80,8 +80,9 @@ function Buzzer({ player, onLeave }: { player: Player; onLeave: () => void }) {
   const won =
     resolved &&
     pressedRound === round!.id &&
-    round!.winner_team === player.team &&
-    round!.winner_name === player.name;
+    (round!.winner_player_id
+      ? round!.winner_player_id === player.player_id
+      : round!.winner_team === player.team && round!.winner_name === player.name);
 
   useEffect(() => {
     if (won && round && playedFor.current !== round.id) {

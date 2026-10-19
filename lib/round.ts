@@ -11,6 +11,8 @@ export type Round = {
   resolved_at: string | null;
   winner_team: Team | null;
   winner_name: string | null;
+  winner_player_id: string | null;
+  points: number | null;
   winner_press_ms: number | null;
 };
 
